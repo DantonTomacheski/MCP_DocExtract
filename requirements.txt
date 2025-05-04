@@ -1,0 +1,9 @@
+openai>=1.0.0
+playwright>=1.34.0 # Added for browser automation
+# Add other dependencies below as needed
+# Example:
+# beautifulsoup4>=4.10.0
+# fastapi>=0.95.0
+# pydantic>=1.10.0
+# typer>=0.9.0
+# asyncio # Built-in, no need to list unless specific version needed

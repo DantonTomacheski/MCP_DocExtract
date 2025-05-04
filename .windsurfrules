@@ -1,0 +1,277 @@
+# .windsurfrules
+
+* ** Always read the @app_flowchart folder before start programing. **
+* ** Always read the @implementation_plan.md file before start programing. **
+* ** Always read the @project_requirements_document.md file before start programing. **
+* ** Always read the @security_guideline_document.md file before start programing. **
+* ** Always read the @tech_stack_document.md file before start programing. **
+
+## Project Overview
+*   **Type:** Documentation Scraper Python (MCP) - Website Documentation Extraction Tool
+*   **Description:** Python-based system for extracting and processing documentation from websites, implementing the Strategy pattern for extensibility, with AI-powered content cleaning and MCP server for agent integration.
+*   **Primary Goal:** Provide a modular, high-performance tool for extracting documentation from websites, cleaning and structuring the content with AI assistance, and exporting it to JSON and Markdown formats, with deployment options for Cloudflare.
+
+## Project Structure
+
+### Core Directory Organization
+*   **Module-Based Structure:**
+    *   `src/`: Main package directory containing all Python modules
+    *   `src/main.py`: Entry point script that parses CLI arguments and orchestrates the scraping process
+    *   `src/controllers/`: Controllers that manage the overall scraping process
+    *   `src/extractors/`: Strategy pattern implementations for content and link extraction
+    *   `src/services/`: Scraping service implementations (sequential and parallel)
+    *   `src/exporters/`: Strategy pattern implementations for file export (JSON/Markdown)
+    *   `src/ai/`: AI integration components for content processing and link filtering
+    *   `src/utils/`: Utility modules for URL parsing, text cleaning, and framework detection
+    *   `src/server/`: MCP and FastAPI server implementations
+    *   `tests/`: Test directory with unit and integration tests
+
+### Extractor Modules
+*   **Strategy Pattern Implementation:**
+    *   `src/extractors/interfaces.py`: Abstract base classes defining strategy interfaces
+        *   Must define `IContentExtractor`, `ILinkExtractor` with proper abstract methods
+    *   `src/extractors/content/generic.py`: Generic content extraction implementation
+        *   Must implement multi-stage extraction with fallbacks
+        *   Must predefine selector priorities: `article`, `main`, `[role="main"]`, etc.
+    *   `src/extractors/content/deepwiki.py`: DeepWiki-specific content extraction
+        *   Must handle DeepWiki DOM structure
+    *   `src/extractors/links/generic.py`: Generic link extraction implementation
+        *   Must implement navigation element detection via selector priority
+    *   `src/extractors/links/deepwiki.py`: DeepWiki-specific link extraction
+
+### Service Modules
+*   **Service Implementations:**
+    *   `src/services/sequential_service.py`: SequentialScraperService for single-threaded BFS traversal
+        *   Must implement URL queue with `collections.deque`
+        *   Must track visited URLs with `set()`
+    *   `src/services/parallel_service.py`: ParallelScraperService for concurrent processing
+        *   Must use `asyncio.Queue` for thread-safe task distribution
+        *   Must implement worker pool pattern with controlled concurrency
+        *   Must implement phases: discovery → parallel processing → export
+
+### AI Components
+*   **AI Integration:**
+    *   `src/ai/content_processor.py`: AIContentProcessor for cleaning documentation content
+        *   Must use templated prompts for consistent results
+        *   Must implement batching for token efficiency
+    *   `src/ai/link_filter.py`: AILinkFilter for contextual link filtering
+        *   Must analyze link relevance based on page context
+        *   Must return boolean decisions or relevance scores
+
+### Export Components
+*   **Output Formatters:**
+    *   `src/exporters/json_exporter.py`: JSONExporter implementation
+        *   Must format with proper indentation (2 spaces)
+        *   Must include metadata section
+    *   `src/exporters/markdown_exporter.py`: MarkdownExporter implementation
+        *   Must format with level 2 headings (##) for each page
+        *   Must use horizontal rules (---) between sections
+
+### Key Files
+*   **Core Implementation Files:**
+    *   `src/main.py`: CLI entry point with argument parsing (using argparse or typer)
+        *   Must define all required parameters: `--url`, `--mode`, `--out`, etc.
+    *   `src/controllers/main_controller.py`: MainController orchestrating the entire process
+        *   Must implement dynamic strategy selection based on mode
+    *   `src/server/mcp_server.py`: MCP server implementation
+        *   Must define tool schemas using Pydantic models
+    *   `src/server/api_server.py`: FastAPI server implementation
+        *   Must define REST endpoints that map to controller actions
+    *   `pyproject.toml`: Project metadata and dependencies
+        *   Must specify exact versions for core dependencies
+    *   `requirements.txt`: Pinned dependencies for reproducibility
+        *   Must include all production and development dependencies
+    *   `Dockerfile`: Container definition for deployment
+        *   Must include Playwright browser installation
+
+## Tech Stack Rules
+
+*   **Version Enforcement:**
+    *   Python 3.9+: use f-strings, type hints, and asyncio
+    *   Playwright@^1.34: must use async API with `async_playwright()`
+    *   FastAPI@^0.95: for MCP server and REST API endpoints
+    *   Pydantic@^1.10: for input validation and schema definitions
+    *   Asyncio: must use for all concurrent operations
+    *   OpenAI API@^0.27: for AI content processing and link filtering (or alternative LLM provider)
+    *   BeautifulSoup4@^4.10: for HTML parsing when Playwright is unavailable
+    *   Typer@^0.9: for CLI interface with type hint-based arguments
+
+*   **Pattern Enforcement:**
+    *   Strategy Pattern: must implement for all extraction and export components
+    *   Dependency Injection: constructor-based for all services and controllers
+    *   Async/Await: must use for all I/O operations (network, file)
+    *   Breadth-First Search: must implement for link traversal
+    *   Worker Pool: must implement for parallel processing
+
+*   **Coding Standards:**
+    *   Type Hints: mandatory for all function signatures and returns
+    *   Docstrings: required for all public methods (Google style)
+    *   Error Handling: must use try/except with specific exception types
+    *   Logging: structured logging with severity levels
+    *   Testing: pytest fixtures for browser and network mocking
+
+## PRD Compliance
+
+*   **Non-Negotiable Requirements:**
+    *   "Extract structured content from documentation websites": must preserve headings, lists, code blocks, and tables in extracted content
+    *   "Support both generic and DeepWiki modes": must implement distinct extraction strategies for each mode
+    *   "Export to JSON and Markdown formats": must implement both exporters with consistent formatting
+    *   "Enable parallel scraping for performance": must support concurrent page processing with configurable concurrency
+    *   "Integrate AI for content cleaning and link filtering": must use LLM API for enhancing extraction quality
+    *   "Implement MCP server for agent integration": must conform to Model Context Protocol specifications
+    *   "Support deployment to Cloudflare Workers": must provide adaptations for serverless environment
+
+*   **Quality Enforcement:**
+    *   Content Extraction: must identify and extract main content, ignoring navigation, footers, etc.
+    *   Link Discovery: must find and normalize all documentation links (relative to absolute)
+    *   Text Cleaning: must preserve technical accuracy while removing clutter
+    *   Error Resilience: must implement timeouts, retries, and fallbacks for navigation errors
+    *   Rate Limiting: must respect websites with configurable delays between requests
+
+## Implementation Rules
+
+*   **Browser Automation:**
+    *   Playwright Configuration:
+        *   Must use chromium browser with headless=True by default
+        *   Must set viewport dimensions to desktop (1280×800)
+        *   Must block unnecessary resources (images, fonts, CSS) for performance
+        *   Must implement page timeouts (default: 30s with fallback to 15s)
+    *   Cloudflare Adaptation:
+        *   Must detect Cloudflare environment with environment variable check
+        *   Must use Browser Rendering API when in Cloudflare environment
+
+*   **Content Extraction Process:**
+    *   Multi-Stage Approach:
+        *   Stage 1: Clean page by removing scripts and non-content elements
+        *   Stage 2: Try structured extraction with prioritized selectors
+        *   Stage 3: If failed, try fallback methods (text extraction, largest block)
+        *   Stage 4: If all fails, use last-resort extraction from body
+    *   Content Cleaning:
+        *   Must normalize whitespace and format headings
+        *   Must preserve code blocks with proper formatting
+        *   Must convert HTML lists to Markdown bullet points
+
+*   **Link Processing:**
+    *   Discovery:
+        *   Must identify navigation elements using predefined selectors
+        *   Must extract all potential documentation links
+    *   Filtering:
+        *   Must normalize URLs (relative → absolute)
+        *   Must filter by domain, path prefix, and file type
+        *   Must track visited URLs to prevent cycles
+    *   AI Enhancement:
+        *   Must evaluate link relevance using context and link text
+        *   Must batch link analysis for API efficiency
+
+*   **Parallel Processing:**
+    *   Worker Pool:
+        *   Must create browser contexts per worker (up to max_concurrency)
+        *   Must use asyncio.Queue for task distribution
+        *   Must implement controlled shutdown of workers
+    *   Synchronization:
+        *   Must use thread-safe data structures for shared state
+        *   Must implement semaphores for resource control
+    *   Rate Control:
+        *   Must implement configurable delays between requests
+        *   Must use domain-specific rate limiting
+
+*   **AI Integration:**
+    *   Content Processing:
+        *   Must use system message defining role as documentation cleaner
+        *   Must instruct to preserve technical accuracy
+        *   Must set temperature=0.3 for deterministic results
+    *   Link Filtering:
+        *   Must provide context of current page and site topic
+        *   Must request binary relevance judgment
+    *   API Efficiency:
+        *   Must implement caching to avoid redundant API calls
+        *   Must batch similar requests when possible
+        *   Must implement fallbacks for when API is unavailable
+
+*   **Export Formats:**
+    *   JSON Structure:
+        *   Must include metadata section with project info and statistics
+        *   Must use page titles as keys and content as values
+    *   Markdown Structure:
+        *   Must use level 2 headings (##) for page titles
+        *   Must separate pages with horizontal rules (---)
+        *   Must preserve all formatting (code, lists, tables)
+
+*   **MCP Server:**
+    *   Tool Definitions:
+        *   Must define scrape_documentation tool with proper schemas
+        *   Must implement request validation with Pydantic
+    *   Response Format:
+        *   Must conform to MCP protocol expectations
+        *   Must provide progress updates for long-running operations
+
+*   **Security and Ethics:**
+    *   Rate Limiting:
+        *   Must implement respectful delays (min 0.5s between requests)
+        *   Must use jitter to avoid detection patterns
+    *   Robots.txt:
+        *   Must check and honor robots.txt restrictions
+        *   Must provide override option with clear warning
+    *   User Agent:
+        *   Must use identifiable user agent string
+        *   Must include contact information
+
+## App Flow Rules
+
+*   **CLI Execution Flow:**
+    *   Command-line Invocation:
+        *   `python -m doc_scraper --url https://example.com/docs --mode generic --out ./output`
+    *   Initialization:
+        *   Parse arguments → Select strategies → Create controller
+    *   Scraping Process:
+        *   Controller runs service → Service loads page → Extract links → Process content → Traverse links
+    *   Output Generation:
+        *   All content processed → Export JSON → Export Markdown → Report statistics
+
+*   **API/MCP Flow:**
+    *   Client Request:
+        *   JSON payload with scrape configuration
+    *   Server Processing:
+        *   Validate input → Create controller → Run scraping process
+    *   Response Handling:
+        *   Successful completion → Return result with file locations
+        *   Failure → Return error details with troubleshooting suggestions
+
+*   **Fallback Mechanisms:**
+    *   Navigation Failures:
+        *   Primary attempt (wait_until='networkidle') → Fallback to 'domcontentloaded' → Text-only extraction
+    *   Content Extraction:
+        *   Primary selectors → Secondary selectors → Largest text block → Body text
+    *   AI Processing:
+        *   API unavailable → Use basic text cleaning → Note in metadata
+
+*   **Cloudflare Deployment Flow:**
+    *   Worker Initialization:
+        *   Detect environment → Configure adapters
+    *   Request Handling:
+        *   Parse request → Use Browser Rendering API → Process content
+    *   Response Generation:
+        *   Format results → Return JSON response → Include download links
+
+## Configuration Rules
+
+*   **Default Parameters:**
+    *   `mode`: "generic" (alternative: "deepwiki")
+    *   `parallel`: True (enables concurrent processing)
+    *   `concurrency`: 5 (worker count for parallel processing)
+    *   `output_dir`: "./output" (directory for exported files)
+    *   `max_depth`: 3 (maximum link depth to follow)
+    *   `request_delay`: 0.5 (seconds between requests to same domain)
+    *   `use_ai`: True (enable AI processing)
+
+*   **Environment Variables:**
+    *   `OPENAI_API_KEY`: For AI processing (required if use_ai=True)
+    *   `LOG_LEVEL`: Controls verbosity (DEBUG, INFO, WARNING, ERROR)
+    *   `CF_WORKER`: Detected automatically in Cloudflare environment
+    *   `REQUEST_TIMEOUT`: Override default page load timeout (seconds)
+
+*   **Optional Flags:**
+    *   `--no-headless`: Show browser during scraping (debugging)
+    *   `--max-pages`: Limit total number of pages to process
+    *   `--ignore-robots`: Override robots.txt restrictions (use cautiously)
+    *   `--verbose`: Increase logging detail

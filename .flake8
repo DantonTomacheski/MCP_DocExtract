@@ -1,0 +1,11 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.venv
+per-file-ignores =
+    # Allow imports in __init__.py
+    __init__.py:F401
+    # Allow complex function definition in tests
+    tests/*:C901
+    # Allow long lines in docstrings
+    *.py:E501:0,1
