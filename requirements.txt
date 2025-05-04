@@ -1,9 +1,11 @@
 openai>=1.0.0
-playwright>=1.34.0 # Added for browser automation
-beautifulsoup4>=4.10.0 # Added for HTML parsing
+playwright>=1.34.0         # Browser automation
+beautifulsoup4>=4.10.0      # HTML parsing
+rich>=13.0.0                # Formatted console output
+fastapi>=0.95.0             # API framework
+pydantic>=1.10.0,<3.0.0    # Data validation and settings management
+typer>=0.9.0                # CLI application framework
+uvicorn[standard]>=0.20.0   # ASGI server for FastAPI
 # Add other dependencies below as needed
 # Example:
-# fastapi>=0.95.0
-# pydantic>=1.10.0
-# typer>=0.9.0
 # asyncio # Built-in, no need to list unless specific version needed
